@@ -4,21 +4,20 @@ import { useAccount, useWriteContract } from 'wagmi';
 import Layout from '../components/Layout';
 import styles from '../styles/Upload.module.css';
 
-// This would be the actual contract ABI and address in a real application
+// Contract ABI and address
 const MCPStakingABI = [
   {
     inputs: [
-      { name: 'mcpId', type: 'string' },
-      { name: 'mcpData', type: 'string' }
+      { name: 'id', type: 'uint256' }
     ],
-    name: 'stakeMCP',
-    outputs: [{ name: '', type: 'bool' }],
+    name: 'stake',
+    outputs: [],
     stateMutability: 'payable',
     type: 'function'
   }
 ] as const;
 
-const MCPStakingAddress = '0x0000000000000000000000000000000000000000'; // Replace with actual contract address
+const MCPStakingAddress = '0xe1cd8bc3662c625c9e8229dd606d42b3e1a714b0'; // Contract address
 
 const Upload: NextPage = () => {
   const { address, isConnected } = useAccount();
@@ -39,8 +38,15 @@ const Upload: NextPage = () => {
       return;
     }
 
-    if (!mcpId || !mcpData) {
-      setUploadError('Please fill in all fields');
+    if (!mcpId) {
+      setUploadError('Please enter an MCP ID');
+      return;
+    }
+
+    // Convert mcpId to a number for the contract call
+    const mcpIdNumber = parseInt(mcpId);
+    if (isNaN(mcpIdNumber)) {
+      setUploadError('MCP ID must be a valid number');
       return;
     }
 
@@ -52,14 +58,14 @@ const Upload: NextPage = () => {
       await writeContractAsync({
         address: MCPStakingAddress,
         abi: MCPStakingABI,
-        functionName: 'stakeMCP',
-        args: [mcpId, mcpData],
+        functionName: 'stake',
+        args: [BigInt(mcpIdNumber)],
         value: BigInt(parseFloat(stakeAmount) * 10**18)
       });
 
       setUploadSuccess(true);
       setMcpId('');
-      setMcpData('');
+      setMcpData(''); // Keep this for UI consistency
     } catch (error) {
       console.error('Error staking MCP:', error);
       setUploadError('Failed to stake MCP. Please try again.');
