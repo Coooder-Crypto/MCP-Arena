@@ -113,7 +113,7 @@ const Upload: NextPage = () => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="stakeAmount">Stake Amount (ETH)</label>
+            <label htmlFor="stakeAmount">Stake Amount </label>
             <input
               type="number"
               id="stakeAmount"
